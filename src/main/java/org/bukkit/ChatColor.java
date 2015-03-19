@@ -1,181 +1,150 @@
 package org.bukkit;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.Validate;
-
-import com.google.common.collect.Maps;
-
+import lombok.Getter;
 /**
- * All supported color values for chat
+ * Simplistic enumeration of all supported color values for chat.
  */
-public enum ChatColor {
+public enum ChatColor
+{
+
     /**
-     * Represents black
+     * Represents black.
      */
-    BLACK('0', 0x00),
+    BLACK( '0', "black" ),
     /**
-     * Represents dark blue
+     * Represents dark blue.
      */
-    DARK_BLUE('1', 0x1),
+    DARK_BLUE( '1', "dark_blue" ),
     /**
-     * Represents dark green
+     * Represents dark green.
      */
-    DARK_GREEN('2', 0x2),
+    DARK_GREEN( '2', "dark_green" ),
     /**
-     * Represents dark blue (aqua)
+     * Represents dark blue (aqua).
      */
-    DARK_AQUA('3', 0x3),
+    DARK_AQUA( '3', "dark_aqua" ),
     /**
-     * Represents dark red
+     * Represents dark red.
      */
-    DARK_RED('4', 0x4),
+    DARK_RED( '4', "dark_red" ),
     /**
-     * Represents dark purple
+     * Represents dark purple.
      */
-    DARK_PURPLE('5', 0x5),
+    DARK_PURPLE( '5', "dark_purple" ),
     /**
-     * Represents gold
+     * Represents gold.
      */
-    GOLD('6', 0x6),
+    GOLD( '6', "gold" ),
     /**
-     * Represents gray
+     * Represents gray.
      */
-    GRAY('7', 0x7),
+    GRAY( '7', "gray" ),
     /**
-     * Represents dark gray
+     * Represents dark gray.
      */
-    DARK_GRAY('8', 0x8),
+    DARK_GRAY( '8', "dark_gray" ),
     /**
-     * Represents blue
+     * Represents blue.
      */
-    BLUE('9', 0x9),
+    BLUE( '9', "blue" ),
     /**
-     * Represents green
+     * Represents green.
      */
-    GREEN('a', 0xA),
+    GREEN( 'a', "green" ),
     /**
-     * Represents aqua
+     * Represents aqua.
      */
-    AQUA('b', 0xB),
+    AQUA( 'b', "aqua" ),
     /**
-     * Represents red
+     * Represents red.
      */
-    RED('c', 0xC),
+    RED( 'c', "red" ),
     /**
-     * Represents light purple
+     * Represents light purple.
      */
-    LIGHT_PURPLE('d', 0xD),
+    LIGHT_PURPLE( 'd', "light_purple" ),
     /**
-     * Represents yellow
+     * Represents yellow.
      */
-    YELLOW('e', 0xE),
+    YELLOW( 'e', "yellow" ),
     /**
-     * Represents white
+     * Represents white.
      */
-    WHITE('f', 0xF),
+    WHITE( 'f', "white" ),
     /**
-     * Represents magical characters that change around randomly
+     * Represents magical characters that change around randomly.
      */
-    MAGIC('k', 0x10, true),
+    MAGIC( 'k', "obfuscated" ),
     /**
      * Makes the text bold.
      */
-    BOLD('l', 0x11, true),
+    BOLD( 'l', "bold" ),
     /**
      * Makes a line appear through the text.
      */
-    STRIKETHROUGH('m', 0x12, true),
+    STRIKETHROUGH( 'm', "strikethrough" ),
     /**
      * Makes the text appear underlined.
      */
-    UNDERLINE('n', 0x13, true),
+    UNDERLINE( 'n', "underline" ),
     /**
      * Makes the text italic.
      */
-    ITALIC('o', 0x14, true),
+    ITALIC( 'o', "italic" ),
     /**
      * Resets all previous chat colors or formats.
      */
-    RESET('r', 0x15);
-
+    RESET( 'r', "reset" );
     /**
      * The special character which prefixes all chat colour codes. Use this if
      * you need to dynamically convert colour codes from your custom format.
      */
     public static final char COLOR_CHAR = '\u00A7';
-    private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf(COLOR_CHAR) + "[0-9A-FK-OR]");
-
-    private final int intCode;
-    private final char code;
-    private final boolean isFormat;
-    private final String toString;
-    private final static Map<Integer, ChatColor> BY_ID = Maps.newHashMap();
-    private final static Map<Character, ChatColor> BY_CHAR = Maps.newHashMap();
-
-    private ChatColor(char code, int intCode) {
-        this(code, intCode, false);
-    }
-
-    private ChatColor(char code, int intCode, boolean isFormat) {
-        this.code = code;
-        this.intCode = intCode;
-        this.isFormat = isFormat;
-        this.toString = new String(new char[] {COLOR_CHAR, code});
-    }
-
+    public static final String ALL_CODES = "0123456789AaBbCcDdEeFfKkLlMmNnOoRr";
     /**
-     * Gets the char value associated with this color
-     *
-     * @return A char value of this color code
+     * Pattern to remove all colour codes.
      */
-    public char getChar() {
-        return code;
+    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile( "(?i)" + String.valueOf( COLOR_CHAR ) + "[0-9A-FK-OR]" );
+    /**
+     * Colour instances keyed by their active character.
+     */
+    private static final Map<Character, ChatColor> BY_CHAR = new HashMap<Character, ChatColor>();
+    /**
+     * The code appended to {@link #COLOR_CHAR} to make usable colour.
+     */
+    private final char code;
+    /**
+     * This colour's colour char prefixed by the {@link #COLOR_CHAR}.
+     */
+    private final String toString;
+    @Getter
+    private final String name;
+
+    static
+    {
+        for ( ChatColor colour : values() )
+        {
+            BY_CHAR.put( colour.code, colour );
+        }
+    }
+
+    private ChatColor(char code, String name)
+    {
+        this.code = code;
+        this.name = name;
+        this.toString = new String( new char[]
+        {
+            COLOR_CHAR, code
+        } );
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return toString;
-    }
-
-    /**
-     * Checks if this code is a format code as opposed to a color code.
-     */
-    public boolean isFormat() {
-        return isFormat;
-    }
-
-    /**
-     * Checks if this code is a color code as opposed to a format code.
-     */
-    public boolean isColor() {
-        return !isFormat && this != RESET;
-    }
-
-    /**
-     * Gets the color represented by the specified color code
-     *
-     * @param code Code to check
-     * @return Associative {@link org.bukkit.ChatColor} with the given code,
-     *     or null if it doesn't exist
-     */
-    public static ChatColor getByChar(char code) {
-        return BY_CHAR.get(code);
-    }
-
-    /**
-     * Gets the color represented by the specified color code
-     *
-     * @param code Code to check
-     * @return Associative {@link org.bukkit.ChatColor} with the given code,
-     *     or null if it doesn't exist
-     */
-    public static ChatColor getByChar(String code) {
-        Validate.notNull(code, "Code cannot be null");
-        Validate.isTrue(code.length() > 0, "Code must have at least one char");
-
-        return BY_CHAR.get(code.charAt(0));
     }
 
     /**
@@ -184,70 +153,38 @@ public enum ChatColor {
      * @param input String to strip of color
      * @return A copy of the input string, without any coloring
      */
-    public static String stripColor(final String input) {
-        if (input == null) {
+    public static String stripColor(final String input)
+    {
+        if ( input == null )
+        {
             return null;
         }
 
-        return STRIP_COLOR_PATTERN.matcher(input).replaceAll("");
+        return STRIP_COLOR_PATTERN.matcher( input ).replaceAll( "" );
     }
 
-    /**
-     * Translates a string using an alternate color code character into a
-     * string that uses the internal ChatColor.COLOR_CODE color code
-     * character. The alternate color code character will only be replaced if
-     * it is immediately followed by 0-9, A-F, a-f, K-O, k-o, R or r.
-     *
-     * @param altColorChar The alternate color code character to replace. Ex: &
-     * @param textToTranslate Text containing the alternate color code character.
-     * @return Text containing the ChatColor.COLOR_CODE color code character.
-     */
-    public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
+    public static String translateAlternateColorCodes(char altColorChar, String textToTranslate)
+    {
         char[] b = textToTranslate.toCharArray();
-        for (int i = 0; i < b.length - 1; i++) {
-            if (b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i+1]) > -1) {
+        for ( int i = 0; i < b.length - 1; i++ )
+        {
+            if ( b[i] == altColorChar && ALL_CODES.indexOf( b[i + 1] ) > -1 )
+            {
                 b[i] = ChatColor.COLOR_CHAR;
-                b[i+1] = Character.toLowerCase(b[i+1]);
+                b[i + 1] = Character.toLowerCase( b[i + 1] );
             }
         }
-        return new String(b);
+        return new String( b );
     }
 
     /**
-     * Gets the ChatColors used at the end of the given input string.
+     * Get the colour represented by the specified code.
      *
-     * @param input Input string to retrieve the colors from.
-     * @return Any remaining ChatColors to pass onto the next line.
+     * @param code the code to search for
+     * @return the mapped colour, or null if non exists
      */
-    public static String getLastColors(String input) {
-        String result = "";
-        int length = input.length();
-
-        // Search backwards from the end as it is faster
-        for (int index = length - 1; index > -1; index--) {
-            char section = input.charAt(index);
-            if (section == COLOR_CHAR && index < length - 1) {
-                char c = input.charAt(index + 1);
-                ChatColor color = getByChar(c);
-
-                if (color != null) {
-                    result = color.toString() + result;
-
-                    // Once we find a color or reset we can stop searching
-                    if (color.isColor() || color.equals(RESET)) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    static {
-        for (ChatColor color : values()) {
-            BY_ID.put(color.intCode, color);
-            BY_CHAR.put(color.code, color);
-        }
+    public static ChatColor getByChar(char code)
+    {
+        return BY_CHAR.get( code );
     }
 }
